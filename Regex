@@ -1,0 +1,12 @@
+
+  "// Finds word(s) starting with letters not endding with space
+  DATA pattern TYPE string VALUE '(\b[a-zA-Z](?!\s))'.
+
+*  FIND ALL OCCURRENCES OF REGEX pattern
+*    IN TABLE table_streets
+*    IGNORING CASE
+*    RESULTS regex_results.
+
+  regex_results = cl_abap_matcher=>create( pattern     = pattern
+                                           ignore_case = abap_true
+                                           table       = table_streets )->find_all( ).
