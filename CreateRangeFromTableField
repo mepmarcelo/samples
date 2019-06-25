@@ -1,0 +1,59 @@
+    CLASS-METHODS create_range_from_table_field
+      IMPORTING i_table       TYPE ANY TABLE
+                i_field_name  TYPE string
+      RETURNING VALUE(result) TYPE REF TO data.
+      
+      
+ METHOD create_range_from_table_field.
+
+    "// **********************************************************************
+    "// #1: Find the field type from the internal table
+    "// **********************************************************************
+
+    "// Get the Structure of Table
+    DATA(abap_tabledescr) = CAST cl_abap_tabledescr( cl_abap_typedescr=>describe_by_data( p_data = i_table ) ).
+    "// Get the Components of structure
+    DATA(components) = CAST cl_abap_structdescr( abap_tabledescr->get_table_line_type( ) )->get_components( ).
+    "// Get the Field structure
+    DATA(component) = components[ name = i_field_name ].
+
+    "// **********************************************************************
+    "// #2: Define the range Structure
+    "// **********************************************************************
+
+    DATA range_components TYPE abap_component_tab.
+
+    DATA(sign)  = CAST cl_abap_datadescr( cl_abap_elemdescr=>describe_by_name( 'CHAR1' ) ).
+    DATA(option) = CAST cl_abap_datadescr( cl_abap_elemdescr=>describe_by_name( 'CHAR2' ) ).
+
+    APPEND INITIAL LINE TO range_components ASSIGNING FIELD-SYMBOL(<range_component>).
+    <range_component>-name = 'SIGN'.
+    <range_component>-type = sign.
+
+    APPEND INITIAL LINE TO range_components ASSIGNING <range_component>.
+    <range_component>-name = 'OPTION'.
+    <range_component>-type = option.
+
+    APPEND INITIAL LINE TO range_components ASSIGNING <range_component>.
+    <range_component>-name = 'LOW'.
+    <range_component>-type = component-type.
+
+    APPEND INITIAL LINE TO range_components ASSIGNING <range_component>.
+    <range_component>-name = 'HIGH'.
+    <range_component>-type = component-type.
+
+    "// **********************************************************************
+    "// #3: Create the range based on the structure
+    "// **********************************************************************
+
+    "// Create components of structure
+    DATA(structure_type) = CAST cl_abap_structdescr( cl_abap_structdescr=>create( range_components ) ).
+
+    "// Create the table based on the structure
+    DATA(table_type) = CAST cl_abap_tabledescr( cl_abap_tabledescr=>create( structure_type ) ).
+
+    CREATE DATA result TYPE HANDLE table_type.
+
+  ENDMETHOD.      
+      
+      
